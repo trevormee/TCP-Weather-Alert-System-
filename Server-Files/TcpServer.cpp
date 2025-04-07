@@ -5,6 +5,8 @@ struct ClientHandlerArgs{
     int client_fd;
 };
 
+std::map<std::string, User*> onlineUsers;
+
 TcpServer::TcpServer(int port) : port(port), server_fd(-1)
 {
     startServer();
@@ -105,52 +107,58 @@ void* TcpServer::handleClient(void* arg)
     ClientHandlerArgs* args = static_cast<ClientHandlerArgs*>(arg);
     int client_fd = args->client_fd;
     delete args;
+    Authentication auth;
+    User* currUser = nullptr;
+    auth.handleLoginRegister(client_fd, onlineUsers, currUser);
 
     char buffer[1024] = {0};
 
-    // if(client_fd < 0)
-    // {
-    //     perror("Error: Invalid client_fd");
-    // }
-
     while(true)
     {
-    // receive data from client
+        memset(buffer, 0, sizeof(buffer));
+        // receive data from client
         ssize_t bytes_read = read(client_fd, buffer, sizeof(buffer) - 1);
 
         if(bytes_read < 0)
         {
             perror("FAILED: Error reading from client socket");
-            break; // Exit the function if read fails
+            break; 
         }
 
-        // std::cout << "Received data from client: " << std::string(buffer, bytes_read) << std::endl;
-
-        // std::string reply = "Hello from server!";
-        // send(client_fd, reply.c_str(), reply.size(), 0);
-
         std::string client_data(buffer, bytes_read);
-        std::cout << "Client: " << client_data << std::endl;
+        client_data.erase(std::remove(client_data.begin(), client_data.end(), '\n'), client_data.end());
+        std::cout << "Received from " << currUser->getUsername() << ": " << client_data << std::endl;
+        //std::cout << "Client: " << client_data << std::endl;
 
         if(client_data == "exit")
         {
-            std::cout << "Client ended chat. Disconnecting..." << std::endl;
+            //std::cout << "Client ended chat. Disconnecting..." << std::endl;
+            std::string goodbye = "Goodbye!\n";
+            send(client_fd, goodbye.c_str(), goodbye.size(), 0);
             break;
         }
 
-        std::string server_reply;
-        std::cout << "> ";
-        std::getline(std::cin, server_reply);
+        std::string server_echo = "Server receievd: " + client_data + "\n";
+        send(client_fd, server_echo.c_str(), server_echo.size(), 0);
 
-        send(client_fd, server_reply.c_str(), server_reply.size(), 0);
-        if(server_reply == "exit")
-        {
-            std::cout << "server ended chat. Disconnecting..." << std::endl;
-            break;
-        }
+        // std::string server_reply;
+        // std::getline(std::cin, server_reply);
 
-        memset(buffer, 0, sizeof(buffer));
+        // send(client_fd, server_reply.c_str(), server_reply.size(), 0);
+        // if(server_reply == "exit")
+        // {
+        //     std::cout << "server ended chat. Disconnecting..." << std::endl;
+        //     break;
+        // }
+
+        // memset(buffer, 0, sizeof(buffer));
     }
+
+    if(currUser){
+        onlineUsers.erase(currUser->getUsername());
+    }
+
+    
     close(client_fd);
     pthread_exit(nullptr);
     return nullptr;

@@ -2,9 +2,8 @@
 #ifndef TCPSERVER_HPP
 #define TCPSERVER_HPP
 
-// #include <unistd.h>
-// #include <sys/types.h>
-// #include <sys/socket.h>
+#include "User.hpp"
+#include "Authentication.hpp"
 
 #include <stdio.h>          
 #include <stdlib.h>         

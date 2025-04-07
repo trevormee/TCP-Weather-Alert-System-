@@ -3,9 +3,6 @@
 #ifndef TCPCLIENT_HPP
 #define TCPCLIENT_HPP
 
-// #include <string>
-// #include <unistd.h>
-
 #include <iostream>
 #include <sys/socket.h>
 #include <netinet/in.h>

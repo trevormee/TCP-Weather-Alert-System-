@@ -12,7 +12,10 @@ CLIENT_OBJS = $(CLIENT_SRCS:.cpp=.o)
 CLIENT_TARGET = client
 
 # Server files
-SERVER_SRCS = $(SERVER_DIR)/TcpServer.cpp $(SERVER_DIR)/ServerMain.cpp
+SERVER_SRCS = $(SERVER_DIR)/TcpServer.cpp \
+			  $(SERVER_DIR)/ServerMain.cpp \
+			  $(SERVER_DIR)/Authentication.cpp \
+			  $(SERVER_DIR)/User.cpp
 SERVER_OBJS = $(SERVER_SRCS:.cpp=.o)
 SERVER_TARGET = server
 

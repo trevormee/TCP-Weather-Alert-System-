@@ -1,0 +1,2 @@
+trevor,password1
+newuser,newuserpassword
