@@ -2,7 +2,26 @@
 #include "TcpClient.hpp"
 
 #include <iostream>
+#include <atomic>
+#include <thread>
 
+std::atomic<bool> running(true);
+
+void receiveLoop(TcpClient& client)
+{
+    while(running)
+    {
+        std::string server_response = client.receiveData();
+        if(!server_response.empty())
+        {
+            std::cout << "\nServer: " << server_response << std::endl;
+        }
+        if(server_response == "exit")
+        {
+            running = false;
+        }
+    }
+}
 
 int main()
 {
@@ -25,25 +44,36 @@ int main()
         return 1;
     }
 
-    std::string message;
-    while(true) {
-        std::cout << "You: ";
-        std::cin.ignore();
-        std::getline(std::cin, message);
+    // std::string message;
+    // while(true) {
+    //     std::cout << "You: ";
+    //     std::cin.ignore();
+    //     std::getline(std::cin, message);
 
-        if(message == "exit"){
+    //     if(message == "exit"){
+    //         break;
+    //     }
+
+    //     client.sendData(message.c_str());
+    //     std::string response = client.receiveData();
+    //     std::cout << "Server: " << response << "\n";
+    // }
+    
+    std::thread receiver(receiveLoop, std::ref(client));
+
+    while (running) {
+        std::string message;
+        std::cout << "> ";
+        std::getline(std::cin, message);
+        client.sendData(message.c_str());
+
+        if (message == "exit") {
+            running = false;
             break;
         }
-
-        client.sendData(message.c_str());
-        std::string response = client.receiveData();
-        std::cout << "Server: " << response << "\n";
     }
-    // const char* message = "Hello from client!";
-    // client.sendData(message);
 
-    // std::string response = client.receiveData();
-    // std::cout << "Received from server: " << response << std::endl;
+    receiver.join();
 
     client.closeConnection();
     return 0;

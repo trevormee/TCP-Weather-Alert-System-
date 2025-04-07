@@ -16,6 +16,8 @@
 #include <fstream>
 #include <sstream>
 #include <csignal>
+#include <cstring>
+#include <pthread.h>
 
 class TcpServer
 {
@@ -29,7 +31,7 @@ class TcpServer
         ~TcpServer();
         bool startServer();
         void runServer();
-        void handleClient(int client_fd);
+        static void* handleClient(void* arg);
         int getServerFd() const { return server_fd; } 
         void closeServer();
         

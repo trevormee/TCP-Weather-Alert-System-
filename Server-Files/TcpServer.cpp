@@ -1,6 +1,10 @@
 // TcpServer.cpp
 #include "TcpServer.hpp"
 
+struct ClientHandlerArgs{
+    int client_fd;
+};
+
 TcpServer::TcpServer(int port) : port(port), server_fd(-1)
 {
     startServer();
@@ -76,7 +80,19 @@ void TcpServer::runServer()
 
         std::cout << "Connection accepted" << std::endl;
 
-        handleClient(client_fd);
+        //handleClient(client_fd);
+        ClientHandlerArgs* args = new ClientHandlerArgs{client_fd};
+        pthread_t tid;
+
+        if(pthread_create(&tid, nullptr, TcpServer::handleClient, args) != 0)
+        {
+            perror("ERROR: Failed to create thread for client");
+            close(client_fd);
+            delete args;
+        }
+        else {
+            pthread_detach(tid);
+        }
 
         //close(client_fd); 
     }
@@ -84,29 +100,60 @@ void TcpServer::runServer()
 
 }
 
-void TcpServer::handleClient(int client_fd)
+void* TcpServer::handleClient(void* arg)
 {
+    ClientHandlerArgs* args = static_cast<ClientHandlerArgs*>(arg);
+    int client_fd = args->client_fd;
+    delete args;
+
     char buffer[1024] = {0};
 
-    if(client_fd < 0)
-    {
-        perror("Error: Invalid client_fd");
-    }
+    // if(client_fd < 0)
+    // {
+    //     perror("Error: Invalid client_fd");
+    // }
 
+    while(true)
+    {
     // receive data from client
-    ssize_t bytes_read = read(client_fd, buffer, sizeof(buffer) - 1);
+        ssize_t bytes_read = read(client_fd, buffer, sizeof(buffer) - 1);
 
-    if(bytes_read < 0)
-    {
-        perror("FAILED: Error reading from client socket");
-        return; // Exit the function if read fails
+        if(bytes_read < 0)
+        {
+            perror("FAILED: Error reading from client socket");
+            break; // Exit the function if read fails
+        }
+
+        // std::cout << "Received data from client: " << std::string(buffer, bytes_read) << std::endl;
+
+        // std::string reply = "Hello from server!";
+        // send(client_fd, reply.c_str(), reply.size(), 0);
+
+        std::string client_data(buffer, bytes_read);
+        std::cout << "Client: " << client_data << std::endl;
+
+        if(client_data == "exit")
+        {
+            std::cout << "Client ended chat. Disconnecting..." << std::endl;
+            break;
+        }
+
+        std::string server_reply;
+        std::cout << "> ";
+        std::getline(std::cin, server_reply);
+
+        send(client_fd, server_reply.c_str(), server_reply.size(), 0);
+        if(server_reply == "exit")
+        {
+            std::cout << "server ended chat. Disconnecting..." << std::endl;
+            break;
+        }
+
+        memset(buffer, 0, sizeof(buffer));
     }
-
-    std::cout << "Received data from client: " << std::string(buffer, bytes_read) << std::endl;
-
-    std::string reply = "Hello from server!";
-    send(client_fd, reply.c_str(), reply.size(), 0);
-
+    close(client_fd);
+    pthread_exit(nullptr);
+    return nullptr;
 }
 
 
