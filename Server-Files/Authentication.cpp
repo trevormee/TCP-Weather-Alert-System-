@@ -47,7 +47,7 @@ bool Authentication::registerUser(const std::string& username, const std::string
         return false;
     }
     
-    fileWrite << "\n" << username << "," << password << "\n";
+    fileWrite << username << "," << password << "\n";
 
     fileWrite.close();
     return true;
@@ -124,6 +124,32 @@ void Authentication::handleLoginRegister(int client_fd, std::map<std::string, Us
                 send(client_fd, fail.c_str(), fail.size(), 0);
             }
         }
+        // else if(choice == "8")
+        // {
+        //     std::string enter_username = "Enter username: ";
+        //     send(client_fd, enter_username.c_str(), enter_username.size(), 0);
+        //     memset(buffer, 0, sizeof(buffer));
+        //     read(client_fd, buffer, sizeof(buffer));
+        //     std::string username(buffer);
+        //     username.erase(std::remove(username.begin(), username.end(), '\n'), username.end());
+
+        //     std::string enter_password = "Enter current password: ";
+        //     send(client_fd, enter_password.c_str(), enter_password.size(), 0);
+        //     memset(buffer, 0, sizeof(buffer));
+        //     read(client_fd, buffer, sizeof(buffer));
+        //     std::string password(buffer);
+        //     password.erase(std::remove(password.begin(), password.end(), '\n'), password.end());
+
+        //     if(isUserRegistered)
+        //     {
+        //         std::string enter_new_password = "Enter your new password: ";
+        //         send(client_fd, enter_new_password.c_str(), enter_new_password.size(), 0);
+        //         memset(buffer, 0, sizeof(buffer));
+        //         read(client_fd, buffer, sizeof(buffer));
+
+        //     }
+
+        // }
         else {
             std::string invalid_choice = "Invalid choice. Try again\n";
             send(client_fd, invalid_choice.c_str(), invalid_choice.size(), 0);

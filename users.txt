@@ -1,2 +1,2 @@
 trevor,password1
-newuser,newuserpassword
+joe,joepw

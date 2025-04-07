@@ -6,6 +6,7 @@ struct ClientHandlerArgs{
 };
 
 std::map<std::string, User*> onlineUsers;
+std::map<std::string, std::set<std::string>> locationSubscribers;
 
 TcpServer::TcpServer(int port) : port(port), server_fd(-1)
 {
@@ -115,11 +116,17 @@ void* TcpServer::handleClient(void* arg)
 
     while(true)
     {
+        std::string user_options = "\n1 Subscribe to a location\n"
+                                    "2 Unsubscribe from a location\n"
+                                    "5 See all the locations you are subsribed to\n"
+                                    "0 Quit\n";
+        send(client_fd, user_options.c_str(), user_options.size(), 0);
         memset(buffer, 0, sizeof(buffer));
+
         // receive data from client
         ssize_t bytes_read = read(client_fd, buffer, sizeof(buffer) - 1);
 
-        if(bytes_read < 0)
+        if(bytes_read <= 0)
         {
             perror("FAILED: Error reading from client socket");
             break; 
@@ -128,18 +135,72 @@ void* TcpServer::handleClient(void* arg)
         std::string client_data(buffer, bytes_read);
         client_data.erase(std::remove(client_data.begin(), client_data.end(), '\n'), client_data.end());
         std::cout << "Received from " << currUser->getUsername() << ": " << client_data << std::endl;
-        //std::cout << "Client: " << client_data << std::endl;
 
-        if(client_data == "exit")
+        if(client_data == "0")
         {
-            //std::cout << "Client ended chat. Disconnecting..." << std::endl;
             std::string goodbye = "Goodbye!\n";
             send(client_fd, goodbye.c_str(), goodbye.size(), 0);
             break;
         }
+        else if(client_data == "1")
+        {
+            std::string input_location_prompt = "Insert the location you want to subscribe to: ";
+            send(client_fd, input_location_prompt.c_str(), input_location_prompt.size(), 0);
+            memset(buffer, 0, sizeof(buffer));
+            read(client_fd, buffer, sizeof(buffer));
+            std::string location(buffer);
+            location.erase(std::remove(location.begin(), location.end(), '\n'), location.end());
 
-        std::string server_echo = "Server receievd: " + client_data + "\n";
-        send(client_fd, server_echo.c_str(), server_echo.size(), 0);
+            currUser->addLocation(location);
+            locationSubscribers[location].insert(currUser->getUsername());
+            
+            std::string successfull_location_add = "Successfully subscribed. Select an option: ";
+            send(client_fd, successfull_location_add.c_str(), successfull_location_add.size(), 0);
+        }
+        else if(client_data == "2")
+        {
+            std::string unsubcribe_prompt = "Enter the location you want to unsubscribe from: ";
+            send(client_fd, unsubcribe_prompt.c_str(), unsubcribe_prompt.size(), 0);
+            memset(buffer, 0, sizeof(buffer));
+            read(client_fd, buffer, sizeof(buffer));
+            std::string location(buffer);
+            location.erase(std::remove(location.begin(), location.end(), '\n'), location.end());
+
+            if(currUser->isSubscribedTo(location)){
+                currUser->removeLocation(location);
+                locationSubscribers[location].erase(currUser->getUsername());
+                std::string unsubcribed_msg = "Unsubcribed from " + location + "\n";
+                send(client_fd, unsubcribed_msg.c_str(), unsubcribed_msg.size(), 0);
+            }else {
+                std::string user_not_subscribed_msg = "You are not subscribed to that location.\n";
+                send(client_fd, user_not_subscribed_msg.c_str(), user_not_subscribed_msg.size(), 0);
+            }
+
+        }
+        else if(client_data == "5")
+        {
+            auto locationSubs = currUser->getLocations();
+            if(locationSubs.empty())
+            {
+                std::string no_location = "No location subscriptions yet";
+                send(client_fd, no_location.c_str(), no_location.size(), 0);
+            }else {     // user is subscribed to at least 1 location
+                std::string user_location_subs = "You are subscribed to:\n";
+                int i = 0;
+                for(const auto& x : locationSubs)
+                {
+                    user_location_subs += std::to_string(i++) + " " + x + "\n";
+                }
+                send(client_fd, user_location_subs.c_str(), user_location_subs.size(), 0);
+            }
+        }
+        else {
+            std::string invalid_choice = "Invalid choice. Try again\n";
+            send(client_fd, invalid_choice.c_str(), invalid_choice.size(), 0);
+        }
+
+        // std::string server_echo = "Server receievd: " + client_data + "\n";
+        // send(client_fd, server_echo.c_str(), server_echo.size(), 0);
 
         // std::string server_reply;
         // std::getline(std::cin, server_reply);
