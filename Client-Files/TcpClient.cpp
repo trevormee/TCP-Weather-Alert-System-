@@ -1,19 +1,38 @@
-// TcpClient.cpp
+/***************************************************************
+  Student Name: Trevor Mee
+  File Name: TcpClient.cpp
+  Project 3 
+
+  @brief Contains the function definitions for TcpClient class
+         of the weather alert system. This class defines the 
+         various functions related to the client side of the 
+         client/server tcp paradigm including connecting to 
+         a server, reading from a server, and writing to a server
+***************************************************************/
+
 #include "TcpClient.hpp"
 
-TcpClient::TcpClient(const std::string& ip, int port) : 
-    server_ip(ip), 
-    server_port(port),
-    client_fd(-1) 
-{}
+/*
+    @brief Parameterized constructor for the TcpClient object
+    @param ip: IP address of the server to connect to
+    @param port: port # of the server to connect to
+*/
+TcpClient::TcpClient(const std::string& ip, int port) : server_ip(ip), server_port(port), client_fd(-1) {}
 
 
+/*
+    @brief Destructor for the TcpClient object to close a client
+           connection
+*/
 TcpClient::~TcpClient()
 {
     closeConnection();
 }
 
-
+/*
+    @brief Establishes a connection to the server
+    @return true if connection was successful, false if not
+*/
 bool TcpClient::connectToServer()
 {
     // create the client socket
@@ -46,10 +65,16 @@ bool TcpClient::connectToServer()
         return false;
     }
     std::cout << "Client connected to server successfully." << std::endl;
+
     return true;
 }
 
-
+/*
+    @brief Sends data to the connected server
+    @param data: the data to be sent
+    @return number of bytes successfully sent, 
+            returns -1 if sending fails
+*/
 int TcpClient::sendData(const char* data)
 {
     // ensure the client socket is connected before sending data
@@ -70,7 +95,11 @@ int TcpClient::sendData(const char* data)
     return bytes_sent; 
 }
 
-
+/*
+    @brief Receives data from the server
+    @return the data received from the server,
+            returns empty string if not data receieved
+*/
 std::string TcpClient::receiveData()
 {
     char buffer[1024] = {0};
@@ -94,13 +123,19 @@ std::string TcpClient::receiveData()
     return std::string(buffer, bytes_received); 
 }
 
-
+/*
+    @brief gets the client socket file descriptor
+    @return the file descriptor of the client socket
+*/
 int TcpClient::getClientFd()
 {
     return client_fd; 
 }
 
-
+/*
+    @brief Closes the connection to the server
+    @return N/A
+*/
 void TcpClient::closeConnection() 
 {
     if (client_fd > 0)

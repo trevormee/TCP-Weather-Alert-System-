@@ -1,4 +1,13 @@
-// Authentication.hpp
+/***************************************************************
+  Student Name: Trevor Mee
+  File Name: Authentication.hpp
+  Project 3 
+
+  @brief Contains the function declarations for the Authentication
+         class of the weather alert system. This class defines 
+         the various functions related to handling user login, 
+         registration, and checking if a user is registered.
+***************************************************************/
 
 #ifndef AUTHENTICATION_HPP
 #define AUTHENTICATION_HPP
@@ -22,6 +31,7 @@ class Authentication
     public:
         const std::string USERS_TXT = "users.txt";
 
+        // function declarations
         bool isUserRegistered(const std::string& username, std::string& password);
         bool registerUser(const std::string& username, const std::string& password);
         bool updatePassword(const std::string& username, const std::string& newPassword);

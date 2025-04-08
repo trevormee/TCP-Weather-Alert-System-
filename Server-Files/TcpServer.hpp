@@ -1,4 +1,16 @@
-// TcpServer.hpp
+/***************************************************************
+  Student Name: Trevor Mee
+  File Name: TcpServer.hpp
+  Project 3 
+
+  @brief Contains the function declarations for TcpServer class
+         of the weather alert system. This class defines the 
+         various functions related to the server side of the 
+         client/server tcp paradigm including starting, running,
+         and closing the server, along with handling client
+         interactions.
+***************************************************************/
+
 #ifndef TCPSERVER_HPP
 #define TCPSERVER_HPP
 
@@ -28,7 +40,7 @@ class TcpServer
         const int NUM_CONCURRENT_CONNECTIONS = 10;
 
     public:
-        //void signalHandler(int signal);
+        // function declarations
         TcpServer(int port);
         ~TcpServer();
         bool startServer();

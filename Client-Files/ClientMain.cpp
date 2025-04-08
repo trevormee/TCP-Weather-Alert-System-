@@ -1,4 +1,12 @@
-// ClientMain.cpp
+/***************************************************************
+  Student Name: Trevor Mee
+  File Name: ClientMain.cpp
+  Project 3 
+
+  @brief Contains the receive loop and main function for 
+         clients to interact with the server
+***************************************************************/
+
 #include "TcpClient.hpp"
 
 #include <iostream>
@@ -8,6 +16,12 @@
 std::atomic<bool> running(true);
 const int PORT = 60001;
 
+/*
+    @brief Continously listens for incoming data/messages
+           from the server
+    @param client: Reference to a TcpClient object
+    @return N/A 
+*/
 void receiveLoop(TcpClient& client)
 {
     while(running)
@@ -15,8 +29,9 @@ void receiveLoop(TcpClient& client)
         std::string server_response = client.receiveData();
         if(!server_response.empty())
         {
-            std::cout << "\nServer: " << server_response << std::endl;
+            std::cout << server_response << std::endl;
         }
+        // check for server shutdown
         if(server_response.find("Server is shutting down. Disconnecting") != std::string::npos)
         {
             running = false;
@@ -25,9 +40,12 @@ void receiveLoop(TcpClient& client)
     }
 }
 
+
+
 int main()
 {
 
+    // prompt user for the serer hostname/ip to connect to
     std::string hostname;
     std::cout << "Enter Hostname: ";
     std::cin >> hostname; 
@@ -46,6 +64,7 @@ int main()
         return 1;
     }
     
+    // create a thread for each client
     std::thread receiver(receiveLoop, std::ref(client));
 
     while (running) {
@@ -61,8 +80,8 @@ int main()
         client.sendData(message.c_str());
     }
 
+    // clean up
     receiver.join();
-    
     client.closeConnection();
 
     return 0;
