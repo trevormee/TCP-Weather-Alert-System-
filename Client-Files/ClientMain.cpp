@@ -6,6 +6,7 @@
 #include <thread>
 
 std::atomic<bool> running(true);
+const int PORT = 60001;
 
 void receiveLoop(TcpClient& client)
 {
@@ -16,9 +17,10 @@ void receiveLoop(TcpClient& client)
         {
             std::cout << "\nServer: " << server_response << std::endl;
         }
-        if(server_response == "exit")
+        if(server_response.find("Server is shutting down. Disconnecting") != std::string::npos)
         {
             running = false;
+            break;
         }
     }
 }
@@ -34,9 +36,10 @@ int main()
     if(hostname == "localhost")
     {
         hostname = "127.0.0.1";
+        std::cout << "localhost resolved to 127.0.0.1\n";
     }
 
-    TcpClient client(hostname, 8080);
+    TcpClient client(hostname, PORT);
 
     if (!client.connectToServer()) {
         std::cerr << "Failed to connect to server.\n";
@@ -47,18 +50,20 @@ int main()
 
     while (running) {
         std::string message;
-        std::cout << "> ";
         std::getline(std::cin, message);
-        client.sendData(message.c_str());
-
-        if (message == "exit") {
+        
+        if (message == "exit" || message == "0") {
+            client.sendData("exit");
             running = false;
             break;
         }
+
+        client.sendData(message.c_str());
     }
 
     receiver.join();
-
+    
     client.closeConnection();
+
     return 0;
 }

@@ -17,6 +17,8 @@
 #include <csignal>
 #include <cstring>
 #include <pthread.h>
+#include <csignal>
+#include <signal.h>
 
 class TcpServer
 {
@@ -26,13 +28,13 @@ class TcpServer
         const int NUM_CONCURRENT_CONNECTIONS = 10;
 
     public:
+        //void signalHandler(int signal);
         TcpServer(int port);
         ~TcpServer();
         bool startServer();
         void runServer();
         static void* handleClient(void* arg);
         int getServerFd() const { return server_fd; } 
-        void closeServer();
-        
+        void closeServer();        
 };
 #endif 

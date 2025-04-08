@@ -7,9 +7,23 @@ struct ClientHandlerArgs{
 
 std::map<std::string, User*> onlineUsers;
 std::map<std::string, std::set<std::string>> locationSubscribers;
+std::set<int> clientSockets;
+TcpServer* instance = nullptr;
+
+
+void signalHandler(int signal)
+{
+    std::cout << "\nReceived signal: " << signal << ", shutting server down" << std::endl;
+    if(instance) {
+        instance->closeServer();
+    }
+    exit(signal);
+}
 
 TcpServer::TcpServer(int port) : port(port), server_fd(-1)
 {
+    signal(SIGINT, signalHandler);
+    instance = this;
     startServer();
 }
 
@@ -80,6 +94,7 @@ void TcpServer::runServer()
             continue; 
         }
 
+        clientSockets.insert(client_fd);
         std::cout << "Connection accepted" << std::endl;
 
         //handleClient(client_fd);
@@ -223,9 +238,11 @@ void* TcpServer::handleClient(void* arg)
                     send(client_fd, currPwNotEqualPrompt.c_str(), currPwNotEqualPrompt.size(), 0);
                 }
             }
-            
-
-
+        }
+        else if(client_data == "0" || client_data == "exit")
+        {
+            std::cout << "Client " << currUser->getUsername() << " has disconnected.\n";
+            break;
         }
         else {
             std::string invalid_choice = "Invalid choice. Try again\n";
@@ -235,9 +252,10 @@ void* TcpServer::handleClient(void* arg)
 
     if(currUser){
         onlineUsers.erase(currUser->getUsername());
+        delete currUser;
     }
 
-    
+    clientSockets.erase(client_fd);
     close(client_fd);
     pthread_exit(nullptr);
     return nullptr;
@@ -246,6 +264,16 @@ void* TcpServer::handleClient(void* arg)
 
 void TcpServer::closeServer()
 {
+    std::cout << "Closing server...\n";
+    for(int x : clientSockets)
+    {
+        std::string serverShutdownMsg = "Server is shutting down. Disconnecting...\n";
+        send(x, serverShutdownMsg.c_str(), serverShutdownMsg.size(), 0);
+        close(x);
+    }
+
+    clientSockets.clear();
+
     if (server_fd > 0) 
     {
         close(server_fd);

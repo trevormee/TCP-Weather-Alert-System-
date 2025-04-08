@@ -1,12 +1,12 @@
 // ServerMain.cpp
 #include "TcpServer.hpp"
 #include <iostream>
-
+const int PORT = 60001;
 
 int main() 
 {
 
-    TcpServer server(8080); // Start the server on port 8080
+    TcpServer server(PORT); 
     server.runServer();
     return 0;
 }
