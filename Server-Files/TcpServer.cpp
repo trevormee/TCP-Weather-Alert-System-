@@ -29,11 +29,10 @@ bool TcpServer::startServer()
         return false;
     }
 
-
     // define the server address
     struct sockaddr_in server_address;
     server_address.sin_family = AF_INET; 
-    server_address.sin_addr.s_addr = INADDR_ANY; // Bind to any address
+    server_address.sin_addr.s_addr = INADDR_ANY; 
     server_address.sin_port = htons(port); 
 
     // bind the socket to the address and port
@@ -119,6 +118,7 @@ void* TcpServer::handleClient(void* arg)
         std::string user_options = "\n1 Subscribe to a location\n"
                                     "2 Unsubscribe from a location\n"
                                     "5 See all the locations you are subsribed to\n"
+                                    "8 Change password\n"
                                     "0 Quit\n";
         send(client_fd, user_options.c_str(), user_options.size(), 0);
         memset(buffer, 0, sizeof(buffer));
@@ -194,25 +194,43 @@ void* TcpServer::handleClient(void* arg)
                 send(client_fd, user_location_subs.c_str(), user_location_subs.size(), 0);
             }
         }
+        else if(client_data == "8"){
+
+            std::string currPwPrompt = "Enter your current password: ";
+            send(client_fd, currPwPrompt.c_str(), currPwPrompt.size(), 0);
+            memset(buffer, 0, sizeof(buffer));
+            read(client_fd, buffer, sizeof(buffer));
+            std::string currPw(buffer);
+            currPw.erase(std::remove(currPw.begin(), currPw.end(), '\n'), currPw.end());
+            
+            std::string storedPw;
+            if(auth.isUserRegistered(currUser->getUsername(), storedPw) && storedPw == currPw)
+            {
+                std::string changePasswordPrompt = "Enter your new password: ";
+                send(client_fd, changePasswordPrompt.c_str(), changePasswordPrompt.size(), 0);
+                memset(buffer, 0, sizeof(buffer));
+                read(client_fd, buffer, sizeof(buffer));
+                std::string newPw(buffer);
+                newPw.erase(std::remove(newPw.begin(), newPw.end(), '\n'), newPw.end());
+
+                if(auth.updatePassword(currUser->getUsername(), newPw))
+                {
+                    std::string successfulPwChange = "Password successfully changed.\n";
+                    send(client_fd, successfulPwChange.c_str(), successfulPwChange.size(), 0);
+                }
+                else {
+                    std::string currPwNotEqualPrompt = "Current password is incorred.\n";
+                    send(client_fd, currPwNotEqualPrompt.c_str(), currPwNotEqualPrompt.size(), 0);
+                }
+            }
+            
+
+
+        }
         else {
             std::string invalid_choice = "Invalid choice. Try again\n";
             send(client_fd, invalid_choice.c_str(), invalid_choice.size(), 0);
         }
-
-        // std::string server_echo = "Server receievd: " + client_data + "\n";
-        // send(client_fd, server_echo.c_str(), server_echo.size(), 0);
-
-        // std::string server_reply;
-        // std::getline(std::cin, server_reply);
-
-        // send(client_fd, server_reply.c_str(), server_reply.size(), 0);
-        // if(server_reply == "exit")
-        // {
-        //     std::cout << "server ended chat. Disconnecting..." << std::endl;
-        //     break;
-        // }
-
-        // memset(buffer, 0, sizeof(buffer));
     }
 
     if(currUser){

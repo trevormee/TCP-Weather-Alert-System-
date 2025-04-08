@@ -37,7 +37,7 @@ bool Authentication::registerUser(const std::string& username, const std::string
     std::string pw;
     if(isUserRegistered(username, pw))
     {
-        return false;
+        return false;       // user already registered
     }
     
     std::ofstream fileWrite(USERS_TXT, std::ios::app);
@@ -49,6 +49,52 @@ bool Authentication::registerUser(const std::string& username, const std::string
     
     fileWrite << username << "," << password << "\n";
 
+    fileWrite.close();
+    return true;
+}
+
+
+bool Authentication::updatePassword(const std::string& username, const std::string& newPassword)
+{
+    std::ifstream fileRead(USERS_TXT);
+
+    if(!fileRead.is_open()){
+        return false;
+    }
+
+    std::string line;
+    std::string updateCredentials;
+    bool updatedYet = false;
+
+    while(std::getline(fileRead, line))
+    {
+        std::istringstream iss(line);
+        std::string uname, pw;
+        if(std::getline(iss, uname, ',') && std::getline(iss, pw)){
+
+            if(uname == username){
+                updateCredentials += uname + "," + newPassword + "\n";
+                updatedYet = true;  
+            } else {
+                updateCredentials += line + "\n";
+            }
+        }
+    }
+
+    fileRead.close();
+
+    if(!updatedYet){
+        return false;
+    }
+
+    std::ofstream fileWrite(USERS_TXT);
+
+    if(!fileWrite.is_open())
+    {
+        return false;
+    }
+
+    fileWrite << updateCredentials;
     fileWrite.close();
     return true;
 }

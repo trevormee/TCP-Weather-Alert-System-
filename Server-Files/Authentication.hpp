@@ -24,7 +24,7 @@ class Authentication
 
         bool isUserRegistered(const std::string& username, std::string& password);
         bool registerUser(const std::string& username, const std::string& password);
-        //bool updatePassword(const std::string& username, const std::string& password);
+        bool updatePassword(const std::string& username, const std::string& newPassword);
         void handleLoginRegister(int client_fd, std::map<std::string, User*>& onlineUsers, User*& currUser);
 };
 #endif
