@@ -11,6 +11,8 @@ This project is a multi-threaded TCP Weather Alert System implemented in C++. It
 
 ## Current Functionality
 The user currently has the following options for the weather alert system...
+- **Initial Connection**
+    - The user will be prompted to enter the hostname/IP address of the server to connect to. For simplicity you can just type ``localhost`` and it will connect you to the IP address at 127.0.0.1.
 - **Pre-login**
   - `1` Login
     - Prompts the user to enter their username
