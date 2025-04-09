@@ -15,6 +15,13 @@ The user currently has the following options for the weather alert system...
   - `1` Login
     - Prompts the user to enter their username
     - Prompts the user to enter ther password  
+    - **Note:** I currently have two registered users already stored in ``users.txt``. Feel free to use these users when testing my project!
+        - User1 Credentials
+            - Username: trevor
+            - Password: Password1
+        - User2 Credentials
+            - Username: newUser
+            - Password: newUserPw
   - `2` Register  
     - Prompts the user to create their username
     - Prompts the user to create their password
@@ -36,6 +43,6 @@ The user currently has the following options for the weather alert system...
 
 
 ## Demos
-I have provided two demo videos located in the 'demo' directory of this project.
-- [Current-Functionality.mp4](demo/Current-Functionality.mp4): Is a screen recording of one client interacting with one server in seperate terminals along with 'users.txt' displayed on screen. This video demos the functionalities of logging in, subscribing and unsubscribing from locations, viewing all location subscriptions for a user, changing a user's password, and terminating the session altogether.
-- [Concurrent-Clients-Register.mp4](demo/Concurrent-Clients-Register.mp4): Is a screen recording of two concurrent clients interacting with the server. You will see one client terminal log in in a similar manner as Current-Functionality.mp4. In the other client terminal, I demonstate the registration functionality of the project as well.
+I have provided two demo videos located in the 'demos' directory of this project.
+- [Current-Functionality.mp4](demos/Current-Functionality.mp4): Is a screen recording of one client interacting with one server in seperate terminals along with 'users.txt' displayed on screen. This video demos the functionalities of logging in, subscribing and unsubscribing from locations, viewing all location subscriptions for a user, changing a user's password, and terminating the session altogether.
+- [Concurrent-Clients-Register.mp4](demos/Concurrent-Clients-Register.mp4): Is a screen recording of two concurrent clients interacting with the server. You will see one client terminal log in in a similar manner as Current-Functionality.mp4. In the other client terminal, I demonstate the registration functionality of the project as well.
